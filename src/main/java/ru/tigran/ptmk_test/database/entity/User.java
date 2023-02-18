@@ -6,6 +6,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Getter
@@ -29,4 +30,12 @@ public class User {
 
     @Column(nullable = false)
     private Boolean sex;
+
+    @Override
+    public String toString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        return "User(" + username + ", " +
+                formatter.format(birthday) + ", " +
+                (sex ? "male" : "female") + ")";
+    }
 }

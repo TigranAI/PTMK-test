@@ -4,7 +4,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
-import ru.tigran.ptmk_test.tasks.TaskOne;
+import ru.tigran.ptmk_test.tasks.*;
 
 @Component
 public class AppReadyListener implements ApplicationListener<ApplicationReadyEvent> {
@@ -13,7 +13,7 @@ public class AppReadyListener implements ApplicationListener<ApplicationReadyEve
         String[] args = event.getArgs();
         if (args.length == 0) System.out.println("Please specify action:\n" +
                 "1 - create users table\n" +
-                "2 <username> <dd.mm.yyyy> <male|female> - create user\n" +
+                "2 <\"Full name\"> <dd.MM.yyyy> <male|female> - create user\n" +
                 "3 - show distinct username+date rows\n" +
                 "4 - auto fill 1M rows\n" +
                 "5 - show male users with username starts 'F' and lead time\n" +
@@ -31,6 +31,7 @@ public class AppReadyListener implements ApplicationListener<ApplicationReadyEve
                 context.getBean(TaskOne.class).doTask(args);
                 break;
             case 2:
+                context.getBean(TaskTwo.class).doTask(args);
                 break;
             case 3:
                 break;
