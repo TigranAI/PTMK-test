@@ -1,6 +1,7 @@
 package ru.tigran.ptmk_test.database.repository;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ public class UserRepoTests {
     }
 
     @Test
+    @Order(2)
     void checkTableIsNotEmpty() {
         List<User> users = userService.findAll();
         assertThat(users).isNotEmpty();

@@ -1,6 +1,3 @@
--- liquibase formatted sql
-
--- changeset liquibase:1
 CREATE TABLE users (
     id varchar(36) primary key,
     username varchar(100) not null,
