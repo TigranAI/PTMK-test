@@ -7,6 +7,7 @@ import ru.tigran.ptmk_test.enums.Sex;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -26,5 +27,10 @@ public class UserService {
 
     public List<User> findAll() {
         return repo.findAll();
+    }
+
+    public List<User> findAllDistinctByUsernameAndBirthdayOrderedByUsername() {
+        List<UUID> ids = repo.findAllIdDistinctByUsernameAndBirthday();
+        return repo.findByIdInOrderByUsername(ids);
     }
 }

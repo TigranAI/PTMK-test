@@ -6,6 +6,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -37,5 +38,11 @@ public class User {
         return "User(" + username + ", " +
                 formatter.format(birthday) + ", " +
                 (sex ? "male" : "female") + ")";
+    }
+
+    public String toStringWithAge(LocalDate dateNow) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        Period period = Period.between(birthday, dateNow);
+        return String.format("User: %s %s %s %d", username, formatter.format(birthday), (sex ? "male" : "female"), period.getYears());
     }
 }
