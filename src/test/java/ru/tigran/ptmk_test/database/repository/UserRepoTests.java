@@ -9,6 +9,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 import ru.tigran.ptmk_test.database.entity.User;
+import ru.tigran.ptmk_test.enums.Sex;
+import ru.tigran.ptmk_test.database.service.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,22 +21,20 @@ import static org.assertj.core.api.Assertions.*;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserRepoTests {
-    @Autowired private UserRepo userRepo;
+    @Autowired private UserService userService;
 
     @BeforeEach
     void writeTestValues() {
-        Assert.notNull(userRepo, "User Repository is null!");
+        Assert.notNull(userService, "UserService is null!");
 
-        userRepo.saveAllAndFlush(List.of(
-                new User("Test One Person", LocalDate.of(2023, 2, 17), false),
-                new User("Test Two Person", LocalDate.of(1999, 11, 26), true),
-                new User("Test Three Person", LocalDate.of(2001, 1, 1), false)
-        ));
+        userService.createUser("Test One Person", LocalDate.of(2023, 2, 17), Sex.Male);
+        userService.createUser("Test Two Person", LocalDate.of(1999, 11, 26), Sex.Female);
+        userService.createUser("Test Three Person", LocalDate.of(2001, 1, 1), Sex.Male);
     }
 
     @Test
     void checkTableIsNotEmpty() {
-        List<User> users = userRepo.findAll();
+        List<User> users = userService.findAll();
         assertThat(users).isNotEmpty();
     }
 }

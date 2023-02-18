@@ -10,8 +10,6 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@ToString
-@NoArgsConstructor
 
 @Entity
 @Table(name = "users")
@@ -31,10 +29,4 @@ public class User {
 
     @Column(nullable = false)
     private Boolean sex;
-
-    public User(String username, LocalDate birthday, Boolean sex) {
-        this.username = username;
-        this.birthday = birthday;
-        this.sex = sex;
-    }
 }
