@@ -23,12 +23,15 @@ public class TaskFour implements PtmkTask{
         int requiredRows = 1000000;
         int chunkSize = 100000;
         int threadGoal = 10000;
+        int threadPoolSize = 10;
         int threadsCount = requiredRows / threadGoal;
 
         BufferedAtomicUserWriter writer = new BufferedAtomicUserWriter(chunkSize, service);
         LocalDate now = LocalDate.now();
 
-        ExecutorService executor = Executors.newFixedThreadPool(threadsCount / 10);
+        ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
+
+        System.out.println("Please wait ... \n");
 
         for (int i = 0; i < threadsCount; ++i) {
             Runnable task = new GenerateUsersRunnable(threadGoal, writer, now);
@@ -36,11 +39,10 @@ public class TaskFour implements PtmkTask{
         }
         executor.shutdown();
 
-        System.out.println("Please wait ...");
         while (!executor.isTerminated()) {}
 
         writer.saveAll();
-        System.out.println("Successfully generated 1 million rows");
+        System.out.println("\nSuccessfully generated 1 million rows");
         return 0;
     }
 }
@@ -81,6 +83,7 @@ class GenerateUsersRunnable implements Runnable {
 
     @Override
     public void run() {
+        System.out.println("\tNew task at thread id: " + Thread.currentThread().getId() + " is started");
         for (int i = 0; i < count; ++i) {
             User user = generateUser();
             writer.write(user);

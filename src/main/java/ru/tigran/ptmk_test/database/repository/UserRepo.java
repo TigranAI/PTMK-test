@@ -23,4 +23,7 @@ public interface UserRepo extends JpaRepository<User, UUID> {
     List<UUID> findAllIdDistinctByUsernameAndBirthday();
 
     List<User> findByIdInOrderByUsername(Collection<UUID> id);
+
+    @Query("select u from User u where u.username like ?1% and u.sex = true")
+    List<User> findAllMaleWithUsernameStarts(String str);
 }

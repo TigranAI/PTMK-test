@@ -37,4 +37,8 @@ public class UserService {
     public void saveAll(Iterable<User> buffer) {
         repo.saveAll(buffer);
     }
+
+    public List<User> findAllMaleWithUsernameStarts(String str) {
+        return repo.findAllMaleWithUsernameStarts(str);
+    }
 }
