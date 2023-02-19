@@ -43,6 +43,7 @@ public class AppReadyListener implements ApplicationListener<ApplicationReadyEve
                 context.getBean(TaskFive.class).doTask(args);
                 break;
             case 6:
+                context.getBean(TaskSix.class).doTask(args);
                 break;
             default: System.out.println("Unknown command");
         }

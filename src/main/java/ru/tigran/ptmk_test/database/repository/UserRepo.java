@@ -2,6 +2,7 @@ package ru.tigran.ptmk_test.database.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.tigran.ptmk_test.database.entity.User;
 
@@ -24,6 +25,6 @@ public interface UserRepo extends JpaRepository<User, UUID> {
 
     List<User> findByIdInOrderByUsername(Collection<UUID> id);
 
-    @Query("select u from User u where u.username like ?1% and u.sex = true")
-    List<User> findAllMaleWithUsernameStarts(String str);
+    @Query(value = "select u from User u where u.username like 'F%' and u.sex = true")
+    List<User> findAllMaleWithUsernameStarts();
 }
