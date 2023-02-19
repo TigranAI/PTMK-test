@@ -5,8 +5,8 @@ import ru.tigran.ptmk_test.database.entity.User;
 import ru.tigran.ptmk_test.database.service.UserService;
 
 import java.time.LocalDate;
+import java.util.LinkedList;
 import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,14 +21,17 @@ public class TaskFour implements PtmkTask{
     @Override
     public int doTask(String[] args) {
         int requiredRows = 1000000;
-        int chunkSize = 10000;
-        BufferedConcurrentUserWriter writer = new BufferedConcurrentUserWriter(chunkSize, service);
+        int chunkSize = 100000;
+        int threadGoal = 10000;
+        int threadsCount = requiredRows / threadGoal;
+
+        BufferedAtomicUserWriter writer = new BufferedAtomicUserWriter(chunkSize, service);
         LocalDate now = LocalDate.now();
 
-        ExecutorService executor = Executors.newFixedThreadPool(5);
+        ExecutorService executor = Executors.newFixedThreadPool(threadsCount / 10);
 
-        for (int i = 0; i < requiredRows / chunkSize; ++i) {
-            Runnable task = new GenerateUsersRunnable(chunkSize, writer, now);
+        for (int i = 0; i < threadsCount; ++i) {
+            Runnable task = new GenerateUsersRunnable(threadGoal, writer, now);
             executor.execute(task);
         }
         executor.shutdown();
@@ -42,20 +45,20 @@ public class TaskFour implements PtmkTask{
     }
 }
 
-class BufferedConcurrentUserWriter {
+class BufferedAtomicUserWriter {
     private final int chunkSize;
-    private final ConcurrentLinkedQueue<User> buffer;
+    private final LinkedList<User> buffer;
 
     private final UserService service;
 
-    public BufferedConcurrentUserWriter(int chunkSize, UserService service) {
+    public BufferedAtomicUserWriter(int chunkSize, UserService service) {
         this.chunkSize = chunkSize;
-        this.buffer = new ConcurrentLinkedQueue<>();
+        this.buffer = new LinkedList<>();
         this.service = service;
     }
 
     public final synchronized void write(User user) {
-        buffer.add(user);
+        buffer.addLast(user);
         if (buffer.size() >= chunkSize) saveAll();
     }
 
@@ -68,9 +71,9 @@ class BufferedConcurrentUserWriter {
 class GenerateUsersRunnable implements Runnable {
     private final LocalDate now;
     private final int count;
-    private final BufferedConcurrentUserWriter writer;
+    private final BufferedAtomicUserWriter writer;
 
-    public GenerateUsersRunnable(int count, BufferedConcurrentUserWriter writer, LocalDate now) {
+    public GenerateUsersRunnable(int count, BufferedAtomicUserWriter writer, LocalDate now) {
         this.count = count;
         this.writer = writer;
         this.now = now;
