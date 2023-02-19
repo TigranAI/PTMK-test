@@ -14,7 +14,7 @@ import java.util.UUID;
 @Setter
 
 @Entity
-@Table(name = "users", indexes = @Index(columnList = "username"))
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(generator = "uuid2")
