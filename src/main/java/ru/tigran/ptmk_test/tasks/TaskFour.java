@@ -5,32 +5,83 @@ import ru.tigran.ptmk_test.database.entity.User;
 import ru.tigran.ptmk_test.database.service.UserService;
 
 import java.time.LocalDate;
-import java.util.LinkedList;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Component
 public class TaskFour implements PtmkTask{
-    private final String alphabet = "abcdefghijklmnopqrstuvwxyz";
-    private final String uppercaseAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-    private final LocalDate now;
     private final UserService service;
 
     public TaskFour(UserService service) {
         this.service = service;
-        this.now = LocalDate.now();
     }
 
     @Override
     public int doTask(String[] args) {
-        BufferedUserWriter writer = new BufferedUserWriter(1000, service);
-        for (int i = 0; i < 1000000; ++i) {
-            User user = generateUser();
-            writer.write(user);
+        int requiredRows = 1000000;
+        int chunkSize = 10000;
+        BufferedConcurrentUserWriter writer = new BufferedConcurrentUserWriter(chunkSize, service);
+        LocalDate now = LocalDate.now();
+
+        ExecutorService executor = Executors.newFixedThreadPool(5);
+
+        for (int i = 0; i < requiredRows / chunkSize; ++i) {
+            Runnable task = new GenerateUsersRunnable(chunkSize, writer, now);
+            executor.execute(task);
         }
+        executor.shutdown();
+
+        System.out.println("Please wait ...");
+        while (!executor.isTerminated()) {}
+
         writer.saveAll();
         System.out.println("Successfully generated 1 million rows");
         return 0;
+    }
+}
+
+class BufferedConcurrentUserWriter {
+    private final int chunkSize;
+    private final ConcurrentLinkedQueue<User> buffer;
+
+    private final UserService service;
+
+    public BufferedConcurrentUserWriter(int chunkSize, UserService service) {
+        this.chunkSize = chunkSize;
+        this.buffer = new ConcurrentLinkedQueue<>();
+        this.service = service;
+    }
+
+    public final synchronized void write(User user) {
+        buffer.add(user);
+        if (buffer.size() >= chunkSize) saveAll();
+    }
+
+    public final synchronized void saveAll() {
+        service.saveAll(buffer);
+        buffer.clear();
+    }
+}
+
+class GenerateUsersRunnable implements Runnable {
+    private final LocalDate now;
+    private final int count;
+    private final BufferedConcurrentUserWriter writer;
+
+    public GenerateUsersRunnable(int count, BufferedConcurrentUserWriter writer, LocalDate now) {
+        this.count = count;
+        this.writer = writer;
+        this.now = now;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < count; ++i) {
+            User user = generateUser();
+            writer.write(user);
+        }
     }
 
     private User generateUser() {
@@ -46,8 +97,10 @@ public class TaskFour implements PtmkTask{
         StringBuilder sb = new StringBuilder();
         int strSize = r.nextInt(5,10);
 
+        String uppercaseAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         sb.append(uppercaseAlphabet.charAt(r.nextInt(26)));
 
+        String alphabet = "abcdefghijklmnopqrstuvwxyz";
         for (int i = 1; i < strSize; ++i)
             sb.append(alphabet.charAt(r.nextInt(26)));
 
@@ -57,28 +110,5 @@ public class TaskFour implements PtmkTask{
     private LocalDate generateDate(Random r) {
         int days = r.nextInt(100) * 365;
         return now.minusDays(days);
-    }
-}
-
-class BufferedUserWriter {
-    private final int chunkSize;
-    private final LinkedList<User> buffer;
-
-    private final UserService service;
-
-    public BufferedUserWriter(int chunkSize, UserService service) {
-        this.chunkSize = chunkSize;
-        this.buffer = new LinkedList<>();
-        this.service = service;
-    }
-
-    public void write(User user) {
-        buffer.addLast(user);
-        if (buffer.size() >= chunkSize) saveAll();
-    }
-
-    public void saveAll() {
-        service.saveAll(buffer);
-        buffer.clear();
     }
 }
