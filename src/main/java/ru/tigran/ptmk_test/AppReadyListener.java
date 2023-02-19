@@ -37,6 +37,7 @@ public class AppReadyListener implements ApplicationListener<ApplicationReadyEve
                 context.getBean(TaskThree.class).doTask(args);
                 break;
             case 4:
+                context.getBean(TaskFour.class).doTask(args);
                 break;
             case 5:
                 break;
