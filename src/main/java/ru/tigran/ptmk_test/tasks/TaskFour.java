@@ -101,7 +101,7 @@ class GenerateUsersRunnable implements Runnable {
 
     private String generateUsername(Random r) {
         StringBuilder sb = new StringBuilder();
-        int strSize = r.nextInt(5,10);
+        int strSize = 5 + r.nextInt(5);
 
         String uppercaseAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         sb.append(uppercaseAlphabet.charAt(r.nextInt(26)));
